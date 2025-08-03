@@ -1,0 +1,16 @@
+services:
+  dev:
+    build:
+      context: .
+      dockerfile: .devcontainer/Dockerfile
+    volumes:
+      - .:/workspace
+      - ml-data:/data
+      - ml-cache:/cache
+    working_dir: /workspace
+    command: tail -f /dev/null
+    user: developer
+
+volumes:
+  ml-data:
+  ml-cache:
