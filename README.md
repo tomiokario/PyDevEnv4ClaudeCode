@@ -1,10 +1,10 @@
 # Claude Code ML Environment
 
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Docker](https://img.shields.io/badge/docker-ready-brightgreen.svg)
 ![Python](https://img.shields.io/badge/python-3.11-blue.svg)
 
 Claude Codeが自律的にPython機械学習開発環境を構築するためのテンプレートリポジトリです。Docker + Development Containersを使用して、永続的で独立した開発環境を簡単に作成できます。
+Claude Codeでこのディレクトリを開いて「このリポジトリの内容を確認して，趣旨に沿った環境構築してください．」と伝えてください。
 
 ## 🚀 クイックスタート
 
@@ -13,7 +13,10 @@ Claude Codeが自律的にPython機械学習開発環境を構築するための
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) がインストールされていること
 - Claude Code または任意のターミナル環境
 
-### 1分で環境構築
+### Cluade Codeを用いた環境構築方法
+Claude Codeでこのディレクトリを開いて「このリポジトリの内容を確認して，趣旨に沿った環境構築してください．」と伝えてください。
+
+### 環境構築方法
 
 ```bash
 # 1. リポジトリをクローン
@@ -166,30 +169,6 @@ cat /workspace/test.txt  # "test" が表示されるはず
 # パッケージの確認
 python -c "import numpy, pandas, matplotlib, sklearn; print('All packages imported successfully')"
 ```
-
-## 🤝 貢献
-
-このプロジェクトへの貢献を歓迎します！
-
-1. フォークしてください
-2. フィーチャーブランチを作成してください (`git checkout -b feature/AmazingFeature`)
-3. 変更をコミットしてください (`git commit -m 'Add some AmazingFeature'`)
-4. ブランチにプッシュしてください (`git push origin feature/AmazingFeature`)
-5. プルリクエストを作成してください
-
-## 📄 ライセンス
-
-このプロジェクトはMITライセンスの下で公開されています。詳細は [LICENSE](LICENSE) ファイルを参照してください。
-
-## 🆘 サポート
-
-問題が発生した場合：
-
-1. [Issues](https://github.com/yourusername/claude-code-ml-env/issues)で既存の問題を確認
-2. 新しい問題を報告する場合は、以下の情報を含めてください：
-   - OS情報
-   - Dockerのバージョン
-   - エラーメッセージ
    - 実行したコマンド
 
 ## 🏷️ タグ
