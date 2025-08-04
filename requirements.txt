@@ -1,8 +1,7 @@
-numpy
-pandas
-matplotlib
-jupyter
-scikit-learn
+# 基本的な開発ツール
 requests>=2.31.0
-tensorflow>=2.15.0
-torch>=2.0.0
+
+# よく使用されるライブラリ（必要に応じて追加/削除）
+# numpy
+# pandas
+# matplotlib

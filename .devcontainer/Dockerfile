@@ -13,8 +13,8 @@ RUN useradd -m -s /bin/bash -G sudo developer && \
     echo "developer ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 # 作業ディレクトリの設定
-RUN mkdir -p /workspace /data /cache /scripts && \
-    chown -R developer:developer /workspace /data /cache /scripts
+RUN mkdir -p /workspace /scripts && \
+    chown -R developer:developer /workspace /scripts
 
 # スクリプトのコピー
 COPY scripts/setup.sh /scripts/
@@ -26,14 +26,9 @@ COPY --chown=developer:developer requirements.txt* /tmp/
 USER developer
 WORKDIR /workspace
 
-# 基本的なPythonパッケージのインストール
-# requirements.txtが存在する場合はそれを使用、なければ基本パッケージをインストール
+# requirements.txtからパッケージをインストール
 RUN if [ -f /tmp/requirements.txt ]; then \
         pip install --user --no-cache-dir -r /tmp/requirements.txt; \
-    else \
-        pip install --user --no-cache-dir \
-            numpy pandas matplotlib jupyter \
-            scikit-learn; \
     fi
 
 # 環境変数の設定

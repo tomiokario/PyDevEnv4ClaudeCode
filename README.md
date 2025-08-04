@@ -1,10 +1,9 @@
-# Claude Code ML Environment
+# Python Development Environment
 
 ![Docker](https://img.shields.io/badge/docker-ready-brightgreen.svg)
 ![Python](https://img.shields.io/badge/python-3.11-blue.svg)
 
-Claude Codeが自律的にPython機械学習開発環境を構築するためのテンプレートリポジトリです。Docker + Development Containersを使用して、永続的で独立した開発環境を簡単に作成できます。
-Claude Codeでこのディレクトリを開いて「このリポジトリの内容を確認して，趣旨に沿った環境構築してください．」と伝えてください。
+Claude Codeが自律的にPython開発環境を構築するためのテンプレートリポジトリです。Docker + Development Containersを使用して、軽量で拡張しやすい開発環境を簡単に作成できます。
 
 ## クイックスタート
 
@@ -13,15 +12,12 @@ Claude Codeでこのディレクトリを開いて「このリポジトリの内
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) がインストールされていること
 - Claude Code または任意のターミナル環境
 
-### Cluade Codeを用いた環境構築方法
-Claude Codeでこのディレクトリを開いて「このリポジトリの内容を確認して，趣旨に沿った環境構築してください．」と伝えてください。
-
 ### 環境構築方法
 
 ```bash
 # 1. リポジトリをクローン
-git clone https://github.com/yourusername/claude-code-ml-env.git
-cd claude-code-ml-env
+git clone https://github.com/yourusername/python-dev-env.git
+cd python-dev-env
 
 # 2. Docker環境をビルド
 docker compose build
@@ -33,7 +29,7 @@ docker compose up -d
 docker compose exec dev bash
 
 # 5. 動作確認（コンテナ内で実行）
-python -c "import numpy, pandas, matplotlib, sklearn; print('✅ 環境準備完了!')"
+python -c "import requests; print('✅ 環境準備完了!')"
 ```
 
 ### VS Code Development Containers使用の場合
@@ -49,24 +45,20 @@ code .
 ## プロジェクト構造
 
 ```
-claude-code-ml-env/
+python-dev-env/
 ├── .devcontainer/          # Development Container設定
 │   └── Dockerfile          # コンテナ定義（requirements.txt対応）
-├── scripts/                # 環境初期化スクリプト
+├── scripts/                # 環境管理スクリプト
 │   ├── setup.sh           # 初期設定スクリプト
-│   └── install-packages.sh # パッケージインストールヘルパー
-├── examples/               # サンプルコード・設定ファイル
+│   └── install-packages.sh # パッケージ管理ヘルパー
 ├── docs/                   # ドキュメント
 │   ├── setup-guide.md     # セットアップガイド
-│   ├── correct-package-installation.md # 正しいパッケージ管理方法
+│   ├── correct-package-installation.md # パッケージ管理方法
 │   └── implementation-log.md # 実装記録
 ├── articles/               # 実践記事・開発体験記録
 ├── src/                    # ソースコード
-├── data/                   # データファイル（永続化）
-├── models/                 # 機械学習モデル
 ├── requirements.txt        # Pythonパッケージ依存関係
 ├── docker-compose.yml      # Docker Compose設定
-├── test-installation.sh    # 環境検証スクリプト
 └── README.md              # このファイル
 ```
 
@@ -75,37 +67,38 @@ claude-code-ml-env/
 ## 特徴
 
 - **Claude Code対応**: AIが自律的に環境を構築・管理可能
-- **永続化**: ファイルとパッケージが永続的に保存
+- **軽量**: 必要最小限のパッケージのみをインストール
+- **拡張可能**: 作業しながら必要なパッケージを簡単追加
 - **独立性**: プロジェクトごとに完全に独立した環境
-- **即利用可能**: 機械学習に必要なパッケージを事前インストール
-- **カスタマイズ可能**: requirements.txtで簡単にパッケージ管理
+- **理解しやすい**: シンプルな構成で理解・カスタマイズが容易
 
 ## パッケージ管理
 
 ### 基本パッケージ（requirements.txt）
 - **Python 3.11**: 最新の安定版Python
+- **requests**: HTTPライブラリ（よく使用される基本ライブラリとして含める）
+
+### よくあるパッケージ（コメントアウト済み）
 - **numpy**: 数値計算ライブラリ
 - **pandas**: データ分析ライブラリ  
 - **matplotlib**: グラフ描画ライブラリ
-- **jupyter**: ノートブック環境
-- **scikit-learn**: 機械学習ライブラリ
-- **requests**: HTTPライブラリ
-- **tensorflow**: ディープラーニングフレームワーク
-- **torch**: PyTorchフレームワーク
+
+必要に応じてコメントアウトを外すか、パッケージ管理スクリプトで追加してください。
 
 ### パッケージの追加方法
 
 ```bash
-# 方法1: requirements.txtに追加して永続化（推奨）
-echo "beautifulsoup4>=4.12.0" >> requirements.txt
-docker compose build --no-cache
-docker compose up -d
+# 方法1: パッケージ管理スクリプトを使用（推奨）
+docker compose exec dev /scripts/install-packages.sh add numpy pandas
 
-# 方法2: コンテナ内で直接インストール（一時的）
-docker compose exec dev pip install --user beautifulsoup4
+# 方法2: 一時的にインストール
+docker compose exec dev /scripts/install-packages.sh install beautifulsoup4
 
-# 方法3: インストールヘルパースクリプトを使用
-docker compose exec dev /scripts/install-packages.sh beautifulsoup4
+# 方法3: パッケージを削除
+docker compose exec dev /scripts/install-packages.sh remove old-package
+
+# 方法4: インストール済みパッケージを確認
+docker compose exec dev /scripts/install-packages.sh list
 ```
 
 **重要**: ホストマシンでの`pip install`は避けてください。必ず`docker compose exec dev`を使用してコンテナ内で実行してください。
@@ -126,24 +119,21 @@ docker compose exec dev bash
 # 3. Pythonスクリプトを実行（コンテナ内）
 docker compose exec dev python src/your_script.py
 
-# 4. Jupyterノートブックを起動（コンテナ内）
-docker compose exec dev jupyter notebook --ip=0.0.0.0 --no-browser
+# 4. Pythonインタープリターを起動（コンテナ内）
+docker compose exec dev python
 
 # 5. 環境停止（データは保持される）
 docker compose down
 
-# 6. 環境の完全削除（注意：データも削除される）
-docker compose down -v
+# 6. 環境の完全削除
+docker compose down
 ```
 
 ### 環境の検証
 
 ```bash
-# 環境状態を確認
-./test-installation.sh
-
 # パッケージ一覧を確認（コンテナ内）
-docker compose exec dev pip list
+docker compose exec dev /scripts/install-packages.sh list
 ```
 
 詳細な使用方法とワークフローについては[使用方法ガイド](docs/setup-guide.md#使用方法)を参照してください。
@@ -161,8 +151,8 @@ docker compose exec dev pip list
 
 本環境を使用した実際の開発体験と技術検証記事：
 
-- **[環境構築実践記録](articles/1_make_environment.md)**: Claude Codeによる自律的なPython機械学習開発環境の構築実践記録
-- **[MNIST CNN開発体験](articles/2_mnist_cnn_implementation.md)**: 実際の機械学習プロジェクト（MNIST画像分類CNN）の開発実践記録
+- **[環境構築実践記録](articles/1_make_environment.md)**: Claude Codeによる自律的なPython開発環境の構築実践記録
+- **[開発実践体験](articles/2_mnist_cnn_implementation.md)**: 実際の開発プロジェクトでの活用例
 
 ## トラブルシューティング
 
@@ -183,7 +173,7 @@ docker compose build --no-cache
 docker compose up -d
 
 # パッケージリストを確認
-docker compose exec dev pip list
+docker compose exec dev /scripts/install-packages.sh list
 ```
 
 ### 権限エラーが発生する場合
@@ -201,4 +191,4 @@ docker compose exec -u developer dev bash
 
 ## タグ
 
-`machine-learning` `docker` `python` `claude-code` `development-environment` `data-science` `jupyter` `devcontainers`
+`python` `docker` `claude-code` `development-environment` `devcontainers` `lightweight`

@@ -1,6 +1,6 @@
 # セットアップガイド
 
-このガイドでは、Claude Code ML Environmentの詳細なセットアップ手順を説明します。
+このガイドでは、Python Development Environmentの詳細なセットアップ手順を説明します。
 
 ## 前提条件
 
@@ -74,8 +74,8 @@ docker run hello-world
 
 ```bash
 # GitHubからクローン
-git clone https://github.com/yourusername/claude-code-ml-env.git
-cd claude-code-ml-env
+git clone https://github.com/yourusername/python-dev-env.git
+cd python-dev-env
 ```
 
 ### ステップ2: Docker環境のビルド
@@ -105,10 +105,10 @@ docker compose exec dev bash
 
 ```bash
 # 基本パッケージの確認
-python -c "import numpy, pandas, matplotlib, sklearn; print('✅ 基本パッケージ利用可能')"
+python -c "import requests; print('✅ 基本環境利用可能')"
 
-# Jupyterの起動テスト
-jupyter notebook --help
+# パッケージ管理スクリプトのテスト
+/scripts/install-packages.sh list
 ```
 
 ## VS Code Development Containers の使用
@@ -144,46 +144,38 @@ docker compose up -d
 docker compose exec dev bash
 ```
 
-### Jupyter Notebookの使用
+### Pythonスクリプトの実行
 
 ```bash
-# コンテナ内で実行
-jupyter notebook --ip=0.0.0.0 --port=8888 --no-browser
+# コンテナ内でPythonスクリプトを実行
+docker compose exec dev python src/your_script.py
 
-# ブラウザで http://localhost:8888 にアクセス
+# インタラクティブなPythonセッション
+docker compose exec dev python
 ```
 
 ### パッケージの追加インストール
 
-#### 推奨方法: requirements.txtを使用
+#### 推奨方法: パッケージ管理スクリプトを使用
 
 ```bash
-# 1. パッケージをrequirements.txtに追加
-echo "torch>=2.0.0" >> requirements.txt
-echo "tensorflow>=2.13.0" >> requirements.txt
+# 1. パッケージを追加してrequirements.txtに自動記録
+docker compose exec dev /scripts/install-packages.sh add numpy pandas matplotlib
 
-# 2. コンテナイメージを再ビルド
-docker compose build --no-cache
-
-# 3. コンテナを再起動
-docker compose down
-docker compose up -d
+# 2. 変更を永続化（イメージ再ビルド）
+docker compose exec dev /scripts/install-packages.sh rebuild
 ```
 
-#### 一時的なインストール（コンテナ内で実行）
+#### 一時的なインストール
 
 ```bash
-# コンテナ内で一時的にインストール（コンテナ再作成時に消える）
-docker compose exec dev pip install --user package-name
+# 一時的にインストール（コンテナ再作成時に消える）
+docker compose exec dev /scripts/install-packages.sh install beautifulsoup4
 
-# 例: 深層学習フレームワーク
-docker compose exec dev pip install --user torch tensorflow
-
-# 例: データ可視化
-docker compose exec dev pip install --user seaborn plotly
-
-# 例: 物理シミュレーション
-docker compose exec dev pip install --user pymunk pybullet
+# パッケージの削除
+docker compose exec dev /scripts/install-packages.sh remove old-package
+# パッケージ一覧を確認
+docker compose exec dev /scripts/install-packages.sh list
 ```
 
 **注意**: パッケージを永続化したい場合は、必ずrequirements.txtに追加してイメージを再ビルドしてください。詳細は[correct-package-installation.md](correct-package-installation.md)を参照してください。
