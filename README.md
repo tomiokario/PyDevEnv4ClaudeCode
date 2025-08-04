@@ -1,4 +1,4 @@
-# Python Development Environment
+# Python Development Environment for Claude Code
 
 ![Docker](https://img.shields.io/badge/docker-ready-brightgreen.svg)
 ![Python](https://img.shields.io/badge/python-3.11-blue.svg)
