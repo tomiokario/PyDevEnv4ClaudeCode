@@ -20,13 +20,21 @@ RUN mkdir -p /workspace /data /cache /scripts && \
 COPY scripts/setup.sh /scripts/
 RUN chmod +x /scripts/setup.sh
 
+# requirements.txtのコピー（存在する場合）
+COPY --chown=developer:developer requirements.txt* /tmp/
+
 USER developer
 WORKDIR /workspace
 
 # 基本的なPythonパッケージのインストール
-RUN pip install --user --no-cache-dir \
-    numpy pandas matplotlib jupyter \
-    scikit-learn
+# requirements.txtが存在する場合はそれを使用、なければ基本パッケージをインストール
+RUN if [ -f /tmp/requirements.txt ]; then \
+        pip install --user --no-cache-dir -r /tmp/requirements.txt; \
+    else \
+        pip install --user --no-cache-dir \
+            numpy pandas matplotlib jupyter \
+            scikit-learn; \
+    fi
 
 # 環境変数の設定
 ENV PATH="/home/developer/.local/bin:$PATH"

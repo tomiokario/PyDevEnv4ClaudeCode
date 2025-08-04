@@ -192,10 +192,17 @@ RUN chmod +x /scripts/setup.sh
 USER developer
 WORKDIR /workspace
 
-# 基本的なPythonパッケージのインストール
-RUN pip install --user --no-cache-dir \
-    numpy pandas matplotlib jupyter \
-    scikit-learn
+# requirements.txtのコピー（存在する場合）
+COPY --chown=developer:developer requirements.txt* /tmp/
+
+# requirements.txtが存在する場合はそれを使用、なければデフォルトパッケージをインストール
+RUN if [ -f /tmp/requirements.txt ]; then \
+        pip install --user --no-cache-dir -r /tmp/requirements.txt; \
+    else \
+        pip install --user --no-cache-dir \
+            numpy pandas matplotlib jupyter \
+            scikit-learn; \
+    fi
 
 # 環境変数の設定
 ENV PATH="/home/developer/.local/bin:$PATH"
@@ -208,7 +215,7 @@ ENV PYTHONPATH="/workspace:$PYTHONPATH"
 3. `developer`という開発用ユーザーを作成
 4. 必要なフォルダを作成し、権限を設定
 5. 初期化スクリプトをコピーして実行権限を付与
-6. 基本的なPython機械学習パッケージをインストール
+6. requirements.txtがある場合はそれを使用、なければデフォルトの機械学習パッケージをインストール
 7. 環境変数を設定
 
 ### 4.5 初期化スクリプト（setup.sh）
@@ -446,12 +453,19 @@ $ docker compose exec dev python -c "import requests; print(requests.__version__
 
 **追加パッケージのインストール:**
 ```bash
+# コンテナ内でパッケージをインストール
 $ docker compose exec dev pip install --user torch
 # Successfully installed filelock-3.18.0 fsspec-2025.7.0 mpmath-1.3.0 
 # networkx-3.5 sympy-1.14.0 torch-2.7.1
 
+# コンテナ内でインストールを確認
 $ docker compose exec dev python -c "import torch; print(f'PyTorch {torch.__version__} imported successfully')"
 # 出力: PyTorch 2.7.1+cpu imported successfully
+
+# 永続化するためにrequirements.txtに追加（推奨）
+$ echo "torch>=2.7.0" >> requirements.txt
+$ docker compose build --no-cache
+$ docker compose down && docker compose up -d
 ```
 
 **検証結果:** 
@@ -543,23 +557,34 @@ $ docker volume inspect makevirtualenvironment_ml-data
 
 **データ分析プロジェクト:**
 ```bash
-# 環境に入る
+# コンテナ内でJupyterノートブックを起動
+docker compose exec dev jupyter notebook --ip=0.0.0.0 --port=8888 --no-browser
+
+# コンテナ内でデータ分析パッケージを追加
+docker compose exec dev pip install --user seaborn plotly
+
+# または環境に入って作業
 docker compose exec dev bash
-
-# Jupyterノートブックを起動
+# ↓ コンテナ内での作業
 jupyter notebook --ip=0.0.0.0 --port=8888 --no-browser
-
-# データ分析パッケージを追加
 pip install --user seaborn plotly
 ```
 
 **機械学習開発:**
 ```bash
-# 深層学習フレームワークを追加
-pip install --user tensorflow torch transformers
+# コンテナ内で深層学習フレームワークを追加
+docker compose exec dev pip install --user tensorflow torch transformers
 
 # GPU対応版（必要に応じて）
-pip install --user torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+docker compose exec dev pip install --user torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+
+# 永続化するためにrequirements.txtに追加
+cat >> requirements.txt << EOF
+tensorflow>=2.19.0
+torch>=2.7.0
+transformers>=4.30.0
+EOF
+docker compose build --no-cache
 ```
 
 **環境の停止・再開:**

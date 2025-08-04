@@ -444,7 +444,7 @@ $ docker compose exec dev python -c "import requests; print(requests.__version__
 # 出力: 2.32.4
 ```
 
-**追加パッケージのインストール:**
+**追加パッケージのインストール（一時的）:**
 ```bash
 $ docker compose exec dev pip install --user torch
 # Successfully installed filelock-3.18.0 fsspec-2025.7.0 mpmath-1.3.0 
@@ -452,6 +452,19 @@ $ docker compose exec dev pip install --user torch
 
 $ docker compose exec dev python -c "import torch; print(f'PyTorch {torch.__version__} imported successfully')"
 # 出力: PyTorch 2.7.1+cpu imported successfully
+```
+
+**永続化のための推奨方法:**
+```bash
+# requirements.txtに追加
+echo "torch>=2.0.0" >> requirements.txt
+
+# イメージを再ビルド
+docker compose build --no-cache
+docker compose up -d
+
+# 永続化された状態を確認
+docker compose exec dev python -c "import torch; print(f'PyTorch {torch.__version__} imported successfully')"
 ```
 
 **検証結果:** 
@@ -546,20 +559,34 @@ $ docker volume inspect makevirtualenvironment_ml-data
 # 環境に入る
 docker compose exec dev bash
 
-# Jupyterノートブックを起動
+# コンテナ内でJupyterノートブックを起動
 jupyter notebook --ip=0.0.0.0 --port=8888 --no-browser
 
-# データ分析パッケージを追加
+# 一時的にデータ分析パッケージを追加（コンテナ内で実行）
 pip install --user seaborn plotly
+
+# 永続化する場合（コンテナから抜けて実行）
+# exit
+# echo "seaborn>=0.12.0" >> requirements.txt
+# echo "plotly>=5.15.0" >> requirements.txt
+# docker compose build --no-cache
+# docker compose up -d
 ```
 
 **機械学習開発:**
 ```bash
-# 深層学習フレームワークを追加
-pip install --user tensorflow torch transformers
+# 推奨方法: requirements.txtに追加してからビルド
+echo "tensorflow>=2.13.0" >> requirements.txt
+echo "torch>=2.0.0" >> requirements.txt
+echo "transformers>=4.30.0" >> requirements.txt
+docker compose build --no-cache
+docker compose up -d
 
-# GPU対応版（必要に応じて）
-pip install --user torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+# 一時的な追加（コンテナ内で実行）
+docker compose exec dev pip install --user tensorflow torch transformers
+
+# GPU対応版（必要に応じて、requirements.txtに記載）
+echo "torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118" >> requirements.txt
 ```
 
 **環境の停止・再開:**
@@ -570,6 +597,16 @@ docker compose down
 # 作業再開時（データは保持される）
 docker compose up -d
 ```
+
+## パッケージ管理に関する重要な改善
+
+本プロジェクトの実装後、パッケージインストール方法について以下の改善が行われました：
+
+1. **requirements.txtの推奨**: パッケージの永続化にはrequirements.txtファイルを使用することを推奨
+2. **正しいコマンドの明確化**: すべてのpipコマンドは`docker compose exec dev`を前置することを明記
+3. **ホストとコンテナの区別**: ホストマシンとDockerコンテナでの作業の違いを明確化
+
+詳細な手順については[correct-package-installation.md](correct-package-installation.md)を参照してください。
 
 ## 結論
 

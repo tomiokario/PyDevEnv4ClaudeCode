@@ -138,7 +138,21 @@ drwxr-xr-x  3 developer developer   96 Aug  3 15:16 src
 既存環境にTensorFlowを追加インストール：
 
 ```bash
+# コンテナ内でTensorFlowをインストール
 $ docker compose exec dev pip install --user tensorflow
+```
+
+**注意**: この方法ではコンテナを再作成すると消えてしまいます。永続化するためには以下の手順を実行してください：
+
+```bash
+# requirements.txtに追加
+echo "tensorflow>=2.19.0" >> requirements.txt
+
+# Dockerイメージを再ビルド
+docker compose build --no-cache
+
+# コンテナを再起動
+docker compose down && docker compose up -d
 ```
 
 **インストール対象パッケージ:**
@@ -386,14 +400,20 @@ model = tf.keras.models.load_model('/workspace/models/mnist_cnn_model.h5')
 
 **教育用途:**
 ```bash
-# 学習者向けの簡単な実行
+# 学習者向けの簡単な実行コマンド
 docker compose exec dev python /workspace/src/mnist_cnn_quick.py
 ```
 
 **研究開発用途:**
 ```bash
-# 追加のフレームワークをインストール
+# コンテナ内で追加のフレームワークをインストール
 docker compose exec dev pip install --user torch transformers
+
+# 永続化するためにrequirements.txtに追加
+cat >> requirements.txt << EOF
+torch>=2.7.0
+transformers>=4.30.0
+EOF
 
 # Jupyter環境での実験
 docker compose exec dev jupyter notebook --ip=0.0.0.0 --port=8888 --no-browser

@@ -155,19 +155,38 @@ jupyter notebook --ip=0.0.0.0 --port=8888 --no-browser
 
 ### パッケージの追加インストール
 
+#### 推奨方法: requirements.txtを使用
+
 ```bash
-# コンテナ内で実行
-pip install --user package-name
+# 1. パッケージをrequirements.txtに追加
+echo "torch>=2.0.0" >> requirements.txt
+echo "tensorflow>=2.13.0" >> requirements.txt
+
+# 2. コンテナイメージを再ビルド
+docker compose build --no-cache
+
+# 3. コンテナを再起動
+docker compose down
+docker compose up -d
+```
+
+#### 一時的なインストール（コンテナ内で実行）
+
+```bash
+# コンテナ内で一時的にインストール（コンテナ再作成時に消える）
+docker compose exec dev pip install --user package-name
 
 # 例: 深層学習フレームワーク
-pip install --user torch tensorflow
+docker compose exec dev pip install --user torch tensorflow
 
 # 例: データ可視化
-pip install --user seaborn plotly
+docker compose exec dev pip install --user seaborn plotly
 
 # 例: 物理シミュレーション
-pip install --user pymunk pybullet
+docker compose exec dev pip install --user pymunk pybullet
 ```
+
+**注意**: パッケージを永続化したい場合は、必ずrequirements.txtに追加してイメージを再ビルドしてください。詳細は[correct-package-installation.md](correct-package-installation.md)を参照してください。
 
 ### ファイルの永続化
 
@@ -204,11 +223,11 @@ cat /workspace/test.txt
 ### パッケージインストールの確認
 
 ```bash
-# 1. パッケージをインストール
-pip install --user requests
+# 1. パッケージをコンテナ内でインストール
+docker compose exec dev pip install --user requests
 
 # 2. 動作確認
-python -c "import requests; print(f'Requests version: {requests.__version__}')"
+docker compose exec dev python -c "import requests; print(f'Requests version: {requests.__version__}')"
 
 # 3. コンテナ再起動
 docker compose restart
@@ -216,6 +235,8 @@ docker compose restart
 # 4. インストールされたパッケージが利用可能か確認
 docker compose exec dev python -c "import requests; print('✅ パッケージが永続化されています')"
 ```
+
+**注意**: 上記の方法は一時的なテストです。パッケージを永続化するには、requirements.txtに追加してイメージを再ビルドする必要があります。詳細な手順は[correct-package-installation.md](correct-package-installation.md)をご覧ください。
 
 ## トラブルシューティング
 
@@ -282,13 +303,20 @@ jupyter notebook --ip=0.0.0.0 --port=8888 --no-browser --allow-root
 
 **解決方法**:
 ```bash
-# 必ず --user フラグを使用
-pip install --user package-name
+# コンテナ内で --user フラグを使用
+docker compose exec dev pip install --user package-name
 
 # 環境変数が設定されているか確認
-echo $PATH
+docker compose exec dev bash -c "echo \$PATH"
 # /home/developer/.local/bin が含まれているはず
+
+# 永続化には requirements.txt を使用
+echo "package-name>=version" >> requirements.txt
+docker compose build --no-cache
+docker compose up -d
 ```
+
+**推奨**: パッケージの永続化には requirements.txt を使用してください。詳細は[correct-package-installation.md](correct-package-installation.md)をご覧ください。
 
 ### デバッグのためのコマンド
 
@@ -314,15 +342,35 @@ docker compose exec dev ps aux
 
 ### 追加パッケージの事前インストール
 
-`.devcontainer/Dockerfile`を編集:
+推奨方法は `requirements.txt` ファイルを使用することです:
 
-```dockerfile
-# 基本的なPythonパッケージのインストール
-RUN pip install --user --no-cache-dir \
-    numpy pandas matplotlib jupyter \
-    scikit-learn \
-    torch tensorflow  # 追加パッケージ
+1. **requirements.txtを作成または編集**:
+```txt
+numpy>=1.24.0
+pandas>=2.0.0
+matplotlib>=3.7.0
+jupyter>=1.0.0
+scikit-learn>=1.3.0
+torch>=2.0.0
+tensorflow>=2.13.0
 ```
+
+2. **Dockerfileで自動読み込み**:
+```dockerfile
+# requirements.txtのコピー（存在する場合）
+COPY --chown=developer:developer requirements.txt* /tmp/
+
+# requirements.txtが存在する場合はそれを使用
+RUN if [ -f /tmp/requirements.txt ]; then \
+        pip install --user --no-cache-dir -r /tmp/requirements.txt; \
+    else \
+        pip install --user --no-cache-dir \
+            numpy pandas matplotlib jupyter \
+            scikit-learn; \
+    fi
+```
+
+詳細な手順は[correct-package-installation.md](correct-package-installation.md)を参照してください。
 
 ### システムパッケージの追加
 

@@ -247,14 +247,20 @@ docker-compose exec dev bash
 環境内で以下のような作業が可能:
 
 ```bash
-# パッケージのインストール
-pip install torch transformers
+# 推奨: requirements.txtにパッケージを追加してからビルド
+echo "torch>=2.0.0" >> requirements.txt
+echo "transformers>=4.30.0" >> requirements.txt
+docker compose build --no-cache
+docker compose up -d
 
-# Pythonスクリプトの実行
-python src/train.py
+# または一時的にコンテナ内でインストール
+docker compose exec dev pip install --user torch transformers
 
-# Jupyterの起動
-jupyter notebook --ip=0.0.0.0 --port=8888 --no-browser
+# Pythonスクリプトの実行（コンテナ内で）
+docker compose exec dev python src/train.py
+
+# Jupyterの起動（コンテナ内で）
+docker compose exec dev jupyter notebook --ip=0.0.0.0 --port=8888 --no-browser
 ```
 
 ## 確認事項
@@ -265,8 +271,9 @@ jupyter notebook --ip=0.0.0.0 --port=8888 --no-browser
 3. ファイルが残っているか確認: `cat /workspace/test.txt`
 
 ### パッケージインストールの確認
-1. パッケージをインストール: `pip install --user requests`
-2. Pythonで確認: `python -c "import requests; print(requests.__version__)"`
+1. コンテナ内でパッケージをインストール: `docker compose exec dev pip install --user requests`
+2. コンテナ内でPythonで確認: `docker compose exec dev python -c "import requests; print(requests.__version__)"`
+3. 永続化にはrequirements.txtを使用: `echo "requests>=2.31.0" >> requirements.txt && docker compose build --no-cache`
 
 ## トラブルシューティング
 
@@ -340,9 +347,14 @@ docker compose up -d
 docker compose exec dev bash
 
 # 3. 作業開始（例）
-pip install --user transformers  # 追加パッケージのインストール
-python -c "import torch; print('PyTorch ready!')"  # 動作確認
-jupyter notebook --ip=0.0.0.0 --port=8888 --no-browser  # Jupyter起動
+# 推奨: requirements.txtでパッケージ管理
+echo "transformers>=4.30.0" >> requirements.txt
+docker compose build --no-cache
+docker compose up -d
+# または一時的に: pip install --user transformers  # コンテナ内で実行
+
+python -c "import torch; print('PyTorch ready!')"  # 動作確認（コンテナ内）
+jupyter notebook --ip=0.0.0.0 --port=8888 --no-browser  # Jupyter起動（コンテナ内）
 
 # 4. 環境の停止（必要に応じて）
 docker compose down
@@ -350,5 +362,15 @@ docker compose down
 # 5. 環境の再開（データは保持される）
 docker compose up -d
 ```
+
+## パッケージ管理の改善
+
+この指示書の実装後、以下の改善が行われました：
+
+1. **requirements.txtの推奨**: パッケージの永続化にはrequirements.txtファイルを使用することを強く推奨
+2. **正しいコマンドの明確化**: すべてのDockerコンテナ内での作業は`docker compose exec dev`を前置することを明記
+3. **ホストとコンテナの区別**: ホストマシンとDockerコンテナでの作業の違いを明確化
+
+詳細な正しいパッケージインストール方法については[correct-package-installation.md](correct-package-installation.md)を参照してください。
 
 **この環境構築指示書により、Claude Codeが完全に自律的かつ永続的な仮想環境を構築・管理できることが実証されました。**
