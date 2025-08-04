@@ -107,8 +107,8 @@ docker compose exec dev bash
 # 基本パッケージの確認
 python -c "import requests; print('✅ 基本環境利用可能')"
 
-# パッケージ管理スクリプトのテスト
-/scripts/install-packages.sh list
+# パッケージ一覧の確認
+pip list
 ```
 
 ## VS Code Development Containers の使用

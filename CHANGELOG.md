@@ -14,7 +14,6 @@
 ### 📚 ドキュメント
 - 新規追加: `docs/correct-package-installation.md` - 正しいパッケージインストール方法の詳細ガイド
 - 新規追加: `test-installation.sh` - 環境検証スクリプト
-- 新規追加: `scripts/install-packages.sh` - パッケージインストールヘルパー
 - 更新: すべてのドキュメントでパッケージ管理方法を修正
   - `README.md`: パッケージ管理セクションを全面改訂
   - `articles/`: 実践記事での正しいインストール方法を記載

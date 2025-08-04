@@ -48,7 +48,6 @@ docker compose exec dev pip list
 docker compose exec dev python /workspace/src/your_script.py
 ```
 
-**重要**: パッケージ管理スクリプト（`/scripts/install-packages.sh`）は現在コンテナ内で利用できないため、直接`pip`コマンドを使用してください。
 
 ### 自律的な開発ワークフロー
 
@@ -103,8 +102,7 @@ python-dev-env/
 ├── .devcontainer/          # Development Container設定
 │   └── Dockerfile          # コンテナ定義（requirements.txt対応）
 ├── scripts/                # 環境管理スクリプト
-│   ├── setup.sh           # 初期設定スクリプト
-│   └── install-packages.sh # パッケージ管理ヘルパー
+│   └── setup.sh           # 初期設定スクリプト
 ├── docs/                   # ドキュメント
 │   ├── setup-guide.md     # セットアップガイド
 │   ├── correct-package-installation.md # パッケージ管理方法

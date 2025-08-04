@@ -15,7 +15,6 @@ python -c "import requests; print(requests.__version__)"
 
 ### 方法1: 直接pipコマンドを使用（推奨）
 
-**重要**: パッケージ管理スクリプト（`/scripts/install-packages.sh`）は現在利用できないため、直接pipコマンドを使用します。
 
 1. **基本的なパッケージのインストール**
 ```bash
@@ -150,4 +149,3 @@ docker compose exec -u root dev pip install requests
 - コンテナ内での作業は`docker compose exec dev`を使用する
 - 軽量な環境を維持し、必要に応じてパッケージを追加する
 
-**注意**: パッケージ管理スクリプト（`/scripts/install-packages.sh`）は現在利用できません。
