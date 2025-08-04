@@ -19,8 +19,9 @@ Claude Codeでこのディレクトリを開いて、以下のように指示し
 
 環境の特徴：
 - 軽量で拡張しやすい構成
-- パッケージ管理スクリプト（/scripts/install-packages.sh）が利用可能
+- 直接pipコマンドでパッケージインストール可能
 - 作業内容は自動的に永続化される
+- Claude Codeでの実際の検証済み
 ```
 
 ### Claude Codeが環境をメンテナンスする方法
@@ -28,29 +29,35 @@ Claude Codeでこのディレクトリを開いて、以下のように指示し
 Claude Codeは以下のコマンドで環境を管理できます：
 
 ```bash
-# パッケージを追加してrequirements.txtに記録
-docker compose exec dev /scripts/install-packages.sh add numpy pandas
+# Docker環境を起動
+docker compose up -d
 
-# 一時的なテスト用インストール
-docker compose exec dev /scripts/install-packages.sh install requests
+# パッケージを直接インストール（推奨方法）
+docker compose exec dev pip install numpy pandas matplotlib torch
 
-# 不要なパッケージを削除
-docker compose exec dev /scripts/install-packages.sh remove old-package
+# PyTorch（機械学習向け）のインストール例
+docker compose exec dev pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+
+# TensorFlow（機械学習向け）のインストール例
+docker compose exec dev pip install tensorflow
 
 # 現在のパッケージ状況を確認
-docker compose exec dev /scripts/install-packages.sh list
+docker compose exec dev pip list
 
-# 変更を永続化（イメージ再ビルド）
-docker compose exec dev /scripts/install-packages.sh rebuild
+# Pythonスクリプトの実行
+docker compose exec dev python /workspace/src/your_script.py
 ```
+
+**重要**: パッケージ管理スクリプト（`/scripts/install-packages.sh`）は現在コンテナ内で利用できないため、直接`pip`コマンドを使用してください。
 
 ### 自律的な開発ワークフロー
 
-1. **環境の確認**: `docker compose exec dev /scripts/install-packages.sh list`
-2. **必要なパッケージの追加**: `add`コマンドでrequirements.txtに記録
-3. **開発作業**: `src/`ディレクトリで作業
-4. **テスト・確認**: `docker compose exec dev python src/your_script.py`
-5. **永続化**: 必要に応じて`rebuild`コマンドでイメージ更新
+1. **環境の起動**: `docker compose up -d`
+2. **パッケージの確認**: `docker compose exec dev pip list`
+3. **必要なパッケージの追加**: `docker compose exec dev pip install パッケージ名`
+4. **開発作業**: `src/`ディレクトリで作業
+5. **テスト・確認**: `docker compose exec dev python /workspace/src/your_script.py`
+6. **環境の停止**: `docker compose down`（データは保持される）
 
 ## クイックスタート
 
@@ -126,27 +133,28 @@ python-dev-env/
 - **Python 3.11**: 最新の安定版Python
 - **requests**: HTTPライブラリ（よく使用される基本ライブラリとして含める）
 
-### よくあるパッケージ（コメントアウト済み）
+### よく使用されるパッケージ例
 - **numpy**: 数値計算ライブラリ
 - **pandas**: データ分析ライブラリ  
 - **matplotlib**: グラフ描画ライブラリ
+- **torch**: PyTorch機械学習フレームワーク
+- **tensorflow**: TensorFlow機械学習フレームワーク
+- **scikit-learn**: 機械学習ライブラリ
 
-必要に応じてコメントアウトを外すか、パッケージ管理スクリプトで追加してください。
-
-### パッケージの追加方法
+### パッケージの追加方法（検証済み）
 
 ```bash
-# 方法1: パッケージ管理スクリプトを使用（推奨）
-docker compose exec dev /scripts/install-packages.sh add numpy pandas
+# 基本的なデータサイエンス・機械学習パッケージ
+docker compose exec dev pip install numpy pandas matplotlib scikit-learn
 
-# 方法2: 一時的にインストール
-docker compose exec dev /scripts/install-packages.sh install beautifulsoup4
+# PyTorch（CPU版）
+docker compose exec dev pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
 
-# 方法3: パッケージを削除
-docker compose exec dev /scripts/install-packages.sh remove old-package
+# TensorFlow
+docker compose exec dev pip install tensorflow
 
-# 方法4: インストール済みパッケージを確認
-docker compose exec dev /scripts/install-packages.sh list
+# その他の便利なパッケージ
+docker compose exec dev pip install jupyter notebook seaborn plotly
 ```
 
 **重要**: ホストマシンでの`pip install`は避けてください。必ず`docker compose exec dev`を使用してコンテナ内で実行してください。
@@ -155,25 +163,26 @@ docker compose exec dev /scripts/install-packages.sh list
 
 ## 使用方法
 
-### 基本的なワークフロー
+### 基本的なワークフロー（Claude Code検証済み）
 
 ```bash
 # 1. 環境起動
 docker compose up -d
 
-# 2. コンテナ内で作業
-docker compose exec dev bash
+# 2. パッケージの確認・インストール
+docker compose exec dev pip list
+docker compose exec dev pip install パッケージ名
 
-# 3. Pythonスクリプトを実行（コンテナ内）
-docker compose exec dev python src/your_script.py
+# 3. Pythonスクリプトを実行
+docker compose exec dev python /workspace/src/your_script.py
 
-# 4. Pythonインタープリターを起動（コンテナ内）
+# 4. インタラクティブPython環境
 docker compose exec dev python
 
-# 5. 環境停止（データは保持される）
-docker compose down
+# 5. コンテナ内でbash作業
+docker compose exec dev bash
 
-# 6. 環境の完全削除
+# 6. 環境停止（データは保持される）
 docker compose down
 ```
 
@@ -181,7 +190,13 @@ docker compose down
 
 ```bash
 # パッケージ一覧を確認（コンテナ内）
-docker compose exec dev /scripts/install-packages.sh list
+docker compose exec dev pip list
+
+# Python環境の確認
+docker compose exec dev python -c "import sys; print(f'Python {sys.version}')"
+
+# 基本パッケージの動作確認
+docker compose exec dev python -c "import requests; print('✅ requests available')"
 ```
 
 詳細な使用方法とワークフローについては[使用方法ガイド](docs/setup-guide.md#使用方法)を参照してください。
@@ -201,7 +216,7 @@ Claude Codeによる自律的な開発環境メンテナンスの実践記録：
 
 - **[環境構築実践記録](articles/1_make_environment.md)**: Claude Codeが自律的にPython開発環境を構築・最適化した実践記録
 - **[自律的開発実践](articles/2_mnist_cnn_implementation.md)**: Claude Codeが環境をメンテナンスしながら開発作業を行った実例
-- **AIエージェントによる環境管理**: パッケージの自動追加・削除、要件に応じた環境最適化の事例
+- **[環境検証実践記録](articles/3_environment_validation.md)**: Claude Codeによる環境の実際の動作検証と改善提案の記録
 
 ## トラブルシューティング
 
@@ -222,7 +237,10 @@ docker compose build --no-cache
 docker compose up -d
 
 # パッケージリストを確認
-docker compose exec dev /scripts/install-packages.sh list
+docker compose exec dev pip list
+
+# パッケージを再インストール
+docker compose exec dev pip install --force-reinstall パッケージ名
 ```
 
 ### 権限エラーが発生する場合

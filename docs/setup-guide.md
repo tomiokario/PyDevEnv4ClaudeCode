@@ -154,28 +154,34 @@ docker compose exec dev python src/your_script.py
 docker compose exec dev python
 ```
 
-### パッケージの追加インストール
+### パッケージの追加インストール（検証済み方法）
 
-#### 推奨方法: パッケージ管理スクリプトを使用
+**重要**: パッケージ管理スクリプトは現在利用できないため、直接pipコマンドを使用します。
+
+#### 推奨方法: 直接pipコマンドを使用
 
 ```bash
-# 1. パッケージを追加してrequirements.txtに自動記録
-docker compose exec dev /scripts/install-packages.sh add numpy pandas matplotlib
+# 基本的なデータサイエンス・機械学習パッケージ
+docker compose exec dev pip install numpy pandas matplotlib scikit-learn
 
-# 2. 変更を永続化（イメージ再ビルド）
-docker compose exec dev /scripts/install-packages.sh rebuild
+# PyTorch（CPU版）
+docker compose exec dev pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+
+# TensorFlow
+docker compose exec dev pip install tensorflow
 ```
 
-#### 一時的なインストール
+#### パッケージの管理
 
 ```bash
-# 一時的にインストール（コンテナ再作成時に消える）
-docker compose exec dev /scripts/install-packages.sh install beautifulsoup4
+# パッケージ一覧を確認
+docker compose exec dev pip list
 
 # パッケージの削除
-docker compose exec dev /scripts/install-packages.sh remove old-package
-# パッケージ一覧を確認
-docker compose exec dev /scripts/install-packages.sh list
+docker compose exec dev pip uninstall パッケージ名
+
+# パッケージの動作確認
+docker compose exec dev python -c "import numpy; print('NumPy available')"
 ```
 
 **注意**: パッケージを永続化したい場合は、必ずrequirements.txtに追加してイメージを再ビルドしてください。詳細は[correct-package-installation.md](correct-package-installation.md)を参照してください。
