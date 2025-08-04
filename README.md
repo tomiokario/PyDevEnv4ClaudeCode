@@ -3,7 +3,54 @@
 ![Docker](https://img.shields.io/badge/docker-ready-brightgreen.svg)
 ![Python](https://img.shields.io/badge/python-3.11-blue.svg)
 
-Claude Codeが自律的にPython開発環境を構築するためのテンプレートリポジトリです。Docker + Development Containersを使用して、軽量で拡張しやすい開発環境を簡単に作成できます。
+**開発AIエージェント（Claude Code）が自律的に環境をメンテナンスしながら開発作業を行うための専用Python開発環境**です。Docker + Development Containersを使用して、AIエージェントが必要に応じてパッケージを追加・削除し、環境を最適化しながら開発できる軽量で拡張しやすい環境を提供します。
+
+## 🤖 Claude Codeでの使用方法
+
+このリポジトリは、開発AIエージェントであるClaude Codeが自律的に環境をメンテナンスしながら開発作業を行うことを目的として設計されています。
+
+### Claude Codeに開発してもらう方法
+
+Claude Codeでこのディレクトリを開いて、以下のように指示してください：
+
+```
+このリポジトリは、あなた（Claude Code）が自律的に開発作業を行うためのPython開発環境です。
+必要に応じてパッケージをインストール・管理しながら、[具体的な開発タスク]を実装してください。
+
+環境の特徴：
+- 軽量で拡張しやすい構成
+- パッケージ管理スクリプト（/scripts/install-packages.sh）が利用可能
+- 作業内容は自動的に永続化される
+```
+
+### Claude Codeが環境をメンテナンスする方法
+
+Claude Codeは以下のコマンドで環境を管理できます：
+
+```bash
+# パッケージを追加してrequirements.txtに記録
+docker compose exec dev /scripts/install-packages.sh add numpy pandas
+
+# 一時的なテスト用インストール
+docker compose exec dev /scripts/install-packages.sh install requests
+
+# 不要なパッケージを削除
+docker compose exec dev /scripts/install-packages.sh remove old-package
+
+# 現在のパッケージ状況を確認
+docker compose exec dev /scripts/install-packages.sh list
+
+# 変更を永続化（イメージ再ビルド）
+docker compose exec dev /scripts/install-packages.sh rebuild
+```
+
+### 自律的な開発ワークフロー
+
+1. **環境の確認**: `docker compose exec dev /scripts/install-packages.sh list`
+2. **必要なパッケージの追加**: `add`コマンドでrequirements.txtに記録
+3. **開発作業**: `src/`ディレクトリで作業
+4. **テスト・確認**: `docker compose exec dev python src/your_script.py`
+5. **永続化**: 必要に応じて`rebuild`コマンドでイメージ更新
 
 ## クイックスタート
 
@@ -66,11 +113,12 @@ python-dev-env/
 
 ## 特徴
 
-- **Claude Code対応**: AIが自律的に環境を構築・管理可能
-- **軽量**: 必要最小限のパッケージのみをインストール
-- **拡張可能**: 作業しながら必要なパッケージを簡単追加
-- **独立性**: プロジェクトごとに完全に独立した環境
-- **理解しやすい**: シンプルな構成で理解・カスタマイズが容易
+- **🤖 Claude Code完全対応**: AIエージェントが自律的に環境構築・パッケージ管理・開発作業を実行
+- **🔧 自律的メンテナンス**: 開発中に必要なパッケージを自動で追加・管理し、環境を最適化
+- **⚡ 軽量設計**: 必要最小限のパッケージから開始、必要に応じて拡張
+- **🔄 作業中の拡張**: 開発しながらリアルタイムでパッケージを追加・削除可能
+- **🏗️ 独立環境**: プロジェクトごとに完全分離された環境でクリーンな開発
+- **📖 理解しやすい**: シンプルな構成でAIエージェントも人間も理解・カスタマイズが簡単
 
 ## パッケージ管理
 
@@ -149,10 +197,11 @@ docker compose exec dev /scripts/install-packages.sh list
 
 ## 実践記事
 
-本環境を使用した実際の開発体験と技術検証記事：
+Claude Codeによる自律的な開発環境メンテナンスの実践記録：
 
-- **[環境構築実践記録](articles/1_make_environment.md)**: Claude Codeによる自律的なPython開発環境の構築実践記録
-- **[開発実践体験](articles/2_mnist_cnn_implementation.md)**: 実際の開発プロジェクトでの活用例
+- **[環境構築実践記録](articles/1_make_environment.md)**: Claude Codeが自律的にPython開発環境を構築・最適化した実践記録
+- **[自律的開発実践](articles/2_mnist_cnn_implementation.md)**: Claude Codeが環境をメンテナンスしながら開発作業を行った実例
+- **AIエージェントによる環境管理**: パッケージの自動追加・削除、要件に応じた環境最適化の事例
 
 ## トラブルシューティング
 
@@ -191,4 +240,4 @@ docker compose exec -u developer dev bash
 
 ## タグ
 
-`python` `docker` `claude-code` `development-environment` `devcontainers` `lightweight`
+`python` `docker` `claude-code` `development-environment` `devcontainers` `lightweight` `ai-agent` `autonomous-development` `package-management` `self-maintaining`
